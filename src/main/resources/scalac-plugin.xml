@@ -1,0 +1,4 @@
+<plugin>
+    <name>better-monadic-for</name>
+    <classname>com.olegpy.BetterMonadicFor</classname>
+</plugin>
