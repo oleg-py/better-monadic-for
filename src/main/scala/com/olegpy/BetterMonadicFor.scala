@@ -1,14 +1,11 @@
 package com.olegpy
 
 import scala.tools.nsc
-import nsc.{Global, Phase}
+import nsc.Global
 import nsc.plugins.Plugin
 import nsc.plugins.PluginComponent
-import nsc.transform.{InfoTransform, Transform, TypingTransformers}
-import nsc.symtab.Flags._
-import nsc.ast.TreeDSL
-import scala.reflect.NameTransformer
-import scala.collection.mutable
+import nsc.transform.{Transform, TypingTransformers}
+
 
 class BetterMonadicFor(val global: Global) extends Plugin {
   val name = "better-monadic-for"
@@ -21,8 +18,6 @@ class ForRewriter(plugin: Plugin, val global: Global)
 
   import global._
 
-  val sp = new StringParser[global.type](global)
-
   val runsAfter = "parser" :: Nil
   override val runsBefore = "namer" :: Nil
   val phaseName = "better-monadic-for"
@@ -31,6 +26,7 @@ class ForRewriter(plugin: Plugin, val global: Global)
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
 
+    // Utility method to for inserting println statements :)
     def debug(t: Tree): String = t match {
       case Literal(txt) => txt.escapedStringValue
       case Select(q, name) => s"Select(${debug(q)}, '${name.toString}')"
@@ -40,18 +36,21 @@ class ForRewriter(plugin: Plugin, val global: Global)
     }
 
 
+    // Transformer does not go deep into blocks by default.
+    // Not sure if I'm extending the wrong class
     override def transform(tree: global.Tree): global.Tree = tree match {
-      case NoWithFilter(sel) =>
-        val r = transform(sel)
-        println(r)
+      // The magic happens in `unapply`:
+      case NoWithFilter(cleaned) =>
+        val r = transform(cleaned)
+        //println(r)
         r
 
       case Block(stats, expr) =>
         Block(transformTrees(stats), transform(expr))
-      case e @ `pendingSuperCall` =>
-        // This extends Apply, and bad things happen if you touch it
-        e
-      case a @ Apply(fun, args) =>
+      case superCall @ `pendingSuperCall` =>
+        // This extends Apply, and compiler crashes on class definition if you touch it
+        superCall
+      case Apply(fun, args) =>
         Apply(transform(fun), transformTrees(args))
       case Select(subtree, name) =>
         Select(transform(subtree), name)
@@ -65,9 +64,13 @@ class ForRewriter(plugin: Plugin, val global: Global)
     }
 
     object UncheckedFilter {
+      // Matches if the function is a lambda passed to `withFilter`
+      // Rules are:
+      // - The body is a match where parameter is annotated with @scala.unchecked
+      // - It's variable name contains "$ifrefutable"
       def unapply(f: Function): Boolean = f match {
         case Function(_, Match(Annotated(q"new scala.unchecked()", Ident(w)), _))
-        if w.toString.contains("ifrefutable") =>
+        if w.toString.contains("$ifrefutable") =>
           true
         case _ => false
       }
@@ -75,18 +78,19 @@ class ForRewriter(plugin: Plugin, val global: Global)
 
     object NoUnchecked {
       def unapply(f: Function): Option[Tree] = f match {
-        case Function(a, m @ Match(Annotated(q"new scala.unchecked()", arg), body)) =>
-          Some(f.copy(a, m.copy(arg, body)))
+        // Bring exhaustivity warnings back to patterns
+        case Function(a, Match(Annotated(q"new scala.unchecked()", arg), body)) =>
+          Some(Function(a, Match(arg, body)))
 
-        // a: Int <- List(1, 2, 3)
+        // @unchecked is not emitted in cases like a: Int <- List(1, 2, 3)
+        // So preserve the function, it's fine.
         case _ => Some(f)
       }
-
     }
 
     object NoWithFilter {
       def unapply(t: Tree): Option[Tree] = t match {
-        case q"$a.withFilter(${f @ UncheckedFilter()}).${n @ UnsafeCandidate()}(${NoUnchecked(g)})" =>
+        case q"$a.withFilter(${UncheckedFilter()}).${n @ UnsafeCandidate()}(${NoUnchecked(g)})" =>
           Some(q"$a.$n($g)")
         case _ => None
       }
