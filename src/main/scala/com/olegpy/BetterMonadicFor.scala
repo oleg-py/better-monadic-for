@@ -26,34 +26,17 @@ class ForRewriter(plugin: Plugin, val global: Global)
 
   class MyTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
 
-    // Utility method to for inserting println statements :)
-    def debug(t: Tree): String = t match {
-      case Literal(txt) => txt.escapedStringValue
-      case Select(q, name) => s"Select(${debug(q)}, '${name.toString}')"
-      case (_: Ident) => t.summaryString
-      case _ =>
-        s"${t.shortClass}(${t.children.map(debug).mkString(", ")})"
-    }
-
+    def inheritPos(tree: Tree)(modified: Tree) =
+      atPos(tree.pos.makeTransparent)(modified)
 
     // Transformer does not go deep into blocks by default.
     // Not sure if I'm extending the wrong class
-    override def transform(tree: global.Tree): global.Tree = tree match {
+    override def transform(tree: Tree): Tree = tree match {
       // The magic happens in `unapply`:
       case NoWithFilter(cleaned) =>
         val r = transform(cleaned)
         //println(r)
-        r
-
-      case Block(stats, expr) =>
-        Block(transformTrees(stats), transform(expr))
-      case superCall @ `pendingSuperCall` =>
-        // This extends Apply, and compiler crashes on class definition if you touch it
-        superCall
-      case Apply(fun, args) =>
-        Apply(transform(fun), transformTrees(args))
-      case Select(subtree, name) =>
-        Select(transform(subtree), name)
+        inheritPos(tree)(r)
       case _ =>
         super.transform(tree)
     }
@@ -77,10 +60,10 @@ class ForRewriter(plugin: Plugin, val global: Global)
     }
 
     object NoUnchecked {
-      def unapply(f: Function): Option[Tree] = f match {
+      def unapply(implicit f: Function): Option[Tree] = f match {
         // Bring exhaustivity warnings back to patterns
         case Function(a, Match(Annotated(q"new scala.unchecked()", arg), body)) =>
-          Some(Function(a, Match(arg, body)))
+          Some(inheritPos(f)(Function(a, Match(arg, body))))
 
         // @unchecked is not emitted in cases like a: Int <- List(1, 2, 3)
         // So preserve the function, it's fine.
@@ -89,9 +72,9 @@ class ForRewriter(plugin: Plugin, val global: Global)
     }
 
     object NoWithFilter {
-      def unapply(t: Tree): Option[Tree] = t match {
+      def unapply(implicit t: Tree): Option[Tree] = t match {
         case q"$a.withFilter(${UncheckedFilter()}).${n @ UnsafeCandidate()}(${NoUnchecked(g)})" =>
-          Some(q"$a.$n($g)")
+          Some(inheritPos(t)(q"$a.$n($g)"))
         case _ => None
       }
     }
