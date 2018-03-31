@@ -1,5 +1,6 @@
 package com.olegpy
 
+import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
 import cats.effect.IO
