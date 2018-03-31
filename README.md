@@ -1,4 +1,8 @@
 # better-monadic-for
+[![Gitter](https://img.shields.io/gitter/room/better-monadic-for/Lobby.svg?style=flat-square)](https://gitter.im/better-monadic-for/Lobby)
+[![Waffle.io - Columns and their card count](https://badge.waffle.io/oleg-py/better-monadic-for.svg?style=flat-square&columns=backlog,gathering%20opinions)](https://waffle.io/oleg-py/better-monadic-for)
+
+
 A Scala compiler plugin to give patterns and for-comprehensions the love they deserve
 
 ## Getting started
