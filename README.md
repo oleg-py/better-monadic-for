@@ -7,6 +7,7 @@ Currently builds are distributed using JitPack
 resolvers += "JitPack" at "https://jitpack.io"
 addCompilerPlugin("com.github.oleg-py" %% "better-monadic-for" % "0.1.0")
 ```
+Supports Scala 2.11 and 2.12.
 
 # Quick taste
 ## Destructuring `Either` / `IO` / `Task` / `FlatMap[F]`
