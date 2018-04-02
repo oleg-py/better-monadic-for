@@ -1,15 +1,14 @@
 # better-monadic-for
 [![Gitter](https://img.shields.io/gitter/room/better-monadic-for/Lobby.svg?style=flat-square)](https://gitter.im/better-monadic-for/Lobby)
 [![Waffle.io - Columns and their card count](https://badge.waffle.io/oleg-py/better-monadic-for.svg?style=flat-square&columns=backlog,gathering%20opinions)](https://waffle.io/oleg-py/better-monadic-for)
-
+![Maven central](https://img.shields.io/maven-central/v/com.olegpy/better-monadic-for_2.12.svg?style=flat-square)
 
 A Scala compiler plugin to give patterns and for-comprehensions the love they deserve
 
 ## Getting started
-Currently builds are distributed using JitPack
+The plugin is available on Maven Central.
 ```
-resolvers += "JitPack" at "https://jitpack.io"
-addCompilerPlugin("com.github.oleg-py" %% "better-monadic-for" % "0.1.0")
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.1.0")
 ```
 Supports Scala 2.11 and 2.12.
 
