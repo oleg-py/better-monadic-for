@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
   "io.monix" %% "monix-eval" % "3.0.0-RC1" % Test,
   "org.ensime" %% "pcplod" % "1.2.1" % Test,
-  "org.scalaz" %% "scalaz" % "7.2.20" % Test,
+  "org.scalaz" %% "scalaz-core" % "7.2.20" % Test,
 )
 
 // WORKAROUND https://github.com/ensime/pcplod/issues/12
