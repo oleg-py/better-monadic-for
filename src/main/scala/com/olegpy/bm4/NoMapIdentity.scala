@@ -9,7 +9,7 @@ import scala.tools.nsc.transform.TypingTransformers
 trait NoMapIdentity extends TreeUtils {
   import global._
 
-  val noMapIdentity: Boolean
+  def noMapIdentity: Boolean
 
   object NoMapIdentity {
     def unapply(tree: Tree): Option[Tree] = tree match {

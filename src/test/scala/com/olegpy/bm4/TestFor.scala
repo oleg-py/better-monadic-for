@@ -13,7 +13,7 @@ import org.scalatest.{FreeSpec, FunSuite}
 
 class TestFor extends FreeSpec {
   "Plugin allows" - {
-    "destructuring for monads without withFilter" - {
+    "destructuring for monads without withFilter" in {
       val task = for {
         (a, b) <- Task.zip2(Task("Hello"), Task("there"))
       } yield s"$a $b"
@@ -32,7 +32,7 @@ class TestFor extends FreeSpec {
       assert(io.unsafeRunSync() == "Output: 3")
     }
 
-    "and with nested for-s" - {
+    "and with nested for-s" in {
       val task = for {
         (a, b) <- Task.zip2(Task("Hello"), Task("there"))
         txt = s"$a $b!"
@@ -44,8 +44,8 @@ class TestFor extends FreeSpec {
     }
 
     "easy type patterns on left hand side" - {
-      "*" -  (for (x: Int <- IO(42)) yield x)
-      "*" - {
+      "for one-liners" in (for (x: Int <- IO(42)) yield x)
+      "for multiple lines" in {
         for {
           x: Int <- IO(42)
           s: String <- IO("Foo")
@@ -53,7 +53,7 @@ class TestFor extends FreeSpec {
       }
     }
 
-    "traversing through deeply nested definitions" - {
+    "traversing through deeply nested definitions" in {
       object A {
         class B {
           val c: Unit = {
@@ -67,17 +67,17 @@ class TestFor extends FreeSpec {
 
   // TODO: utest compileError does not use plugin
   "exhaustiveness checks" - {
-    "*" - {
+    "option" in {
       for (Some(x) <- IO(none[Int])) yield x
     }
-    "*" - {
+    "lists & singletons" in {
       object Singleton
       for (Singleton <- IO(Singleton); (a, Nil) <- IO((1, List(1)))) yield a
     }
   }
 
   "preserving" - {
-    "if guards for things supporting it" - {
+    "if guards for things supporting it" in {
       val res = for {
         bool <- List(true, false, false, true)
         if bool

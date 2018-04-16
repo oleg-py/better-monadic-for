@@ -13,6 +13,7 @@ class BetterMonadicFor(val global: Global) extends Plugin {
   val components =
     new ForRewriter(this, global) ::
     new MapRemover(this, global) ::
+    new TupleRemover(this, global) ::
     Nil
 
   var noUncheckedFilter = true
@@ -67,8 +68,7 @@ class BetterMonadicFor(val global: Global) extends Plugin {
 }
 
 class ForRewriter(plugin: BetterMonadicFor, val global: Global)
-  extends PluginComponent with Transform
-    with TypingTransformers
+  extends PluginComponent with Transform with TypingTransformers
     with NoUncheckedFilter
 {
 
@@ -94,17 +94,16 @@ class ForRewriter(plugin: BetterMonadicFor, val global: Global)
 }
 
 class MapRemover(plugin: BetterMonadicFor, val global: Global)
-   extends PluginComponent with Transform
-     with TypingTransformers
+   extends PluginComponent with Transform with TypingTransformers
      with NoMapIdentity
-{ parent =>
+{
   import global._
 
 
   protected def newTransformer(unit: global.CompilationUnit) =
     new MapIdentityRemoveTransformer(unit)
 
-  val noMapIdentity = plugin.noMapIdentity
+  def noMapIdentity = plugin.noMapIdentity
 
   val phaseName = "bm4-typer"
   val runsAfter = "typer" :: Nil
@@ -122,6 +121,30 @@ class MapRemover(plugin: BetterMonadicFor, val global: Global)
         case _ =>
           super.transform(tree)
       }
+    }
+  }
+}
+
+class TupleRemover(plugin: BetterMonadicFor, val global: Global)
+  extends PluginComponent with Transform with TypingTransformers
+  with NoTupleBinding {
+  import global._
+  protected def newTransformer(unit: global.CompilationUnit): Transformer =
+    new TupleRemoveTransformer(unit)
+
+  def noTupling: Boolean = plugin.noTupling
+  val phaseName: String = "bm4-parser2"
+  val runsAfter: List[String] = "parser" :: "bm4-parser" :: Nil
+  override val runsBefore: List[String] = "patmat" :: Nil
+
+  class TupleRemoveTransformer(unit: CompilationUnit)
+    extends TypingTransformer(unit)
+  {
+    override def transform(tree: Tree): Tree = tree match {
+      case NoTupleBinding(cleaned) =>
+        transform(cleaned)
+      case _ =>
+        super.transform(tree)
     }
   }
 }

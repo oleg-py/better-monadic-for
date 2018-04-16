@@ -17,4 +17,9 @@ trait TreeUtils {
     atPos(prev.pos.makeTransparent)(next)
       .setAttachments(prev.attachments)
   }
+
+  object ForArtifact {
+    def apply(arg: Tree): Boolean =
+      arg.children.exists(_.hasAttachment[ForAttachment.type])
+  }
 }

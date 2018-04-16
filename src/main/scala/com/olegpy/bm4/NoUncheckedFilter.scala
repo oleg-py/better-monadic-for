@@ -4,7 +4,7 @@ package com.olegpy.bm4
 trait NoUncheckedFilter extends TreeUtils {
   import global._
 
-  val noUncheckedFilter: Boolean
+  def noUncheckedFilter: Boolean
 
   object FollowUp {
     private val set = Set("map", "flatMap", "foreach")
