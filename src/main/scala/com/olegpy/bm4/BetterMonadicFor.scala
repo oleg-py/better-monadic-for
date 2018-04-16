@@ -15,11 +15,55 @@ class BetterMonadicFor(val global: Global) extends Plugin {
     new MapRemover(this, global) ::
     Nil
 
-  val noUncheckedFilter = true
-  val noMapIdentity = true
+  var noUncheckedFilter = true
+  var noMapIdentity     = true
+  var noTupling         = true
 
-  override def init(options: List[String], error: String => Unit): Boolean =
-    super.init(options, error)
+  val knobs = Map(
+    "no-filtering" -> "Remove .withFilter from generator desugaring",
+    "no-map-id"    -> "Optimize .map(x => x) and .map(_ => ())",
+    "no-tupling"   -> "Not implemented yet"
+  )
+
+
+  override val optionsHelp: Option[String] = Some(
+    knobs
+      .map { case (key, help) =>
+        s"  -P:$name:$key:(y/n)".padTo(31, ' ') ++ help
+      }
+      .mkString(System.lineSeparator)
+  )
+
+  override def init(options: List[String], error: String => Unit): Boolean = {
+    val (known, unknown) = options.partition(s => knobs.keys.exists(s.startsWith))
+    if (unknown.nonEmpty) {
+      error(s"Unknown options: ${unknown.mkString(", ")}")
+      return false
+    }
+
+    val toBoolean = (txt: String) => txt.toLowerCase match {
+      case "y" | "yes" | "1" | "true"  => true
+      case "n" | "no"  | "0" | "false" => false
+      case _ =>
+        error(s"Unknown boolean value $txt")
+        return false
+    }
+
+    for {
+      key <- known
+      _ = if (!key.contains(':')) {
+        error(s"Option $key does not include the parameter (e.g. $key:y)")
+        return false
+      }
+      Array(prefix, value) = key.split(":", 2)
+    } prefix match {
+      case "no-filtering" => noUncheckedFilter = toBoolean(value)
+      case "no-map-id"    => noMapIdentity     = toBoolean(value)
+      case "no-tupling"   => noTupling         = toBoolean(value)
+    }
+
+    noUncheckedFilter || noMapIdentity || noTupling
+  }
 }
 
 class ForRewriter(plugin: BetterMonadicFor, val global: Global)
@@ -60,7 +104,7 @@ class MapRemover(plugin: BetterMonadicFor, val global: Global)
   protected def newTransformer(unit: global.CompilationUnit) =
     new MapIdentityRemoveTransformer(unit)
 
-  val noMapIdentity = true
+  val noMapIdentity = plugin.noMapIdentity
 
   val phaseName = "bm4-typer"
   val runsAfter = "typer" :: Nil
