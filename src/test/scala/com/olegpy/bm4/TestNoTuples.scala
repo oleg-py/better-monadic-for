@@ -14,15 +14,17 @@ class TestNoTuples extends FreeSpec {
     }
 
     "for multiple generators" in {
-      for {
+      val r = for {
         a <- new TupleChecker(4)
         b = 42
         c <- new TupleChecker(6)
       } yield a + b + c
+
+      assert(r.a == 52)
     }
 
     "for multiple bindings" in {
-      for {
+      val r = for {
         a <- new TupleChecker(4)
         b0 = 42
         b1 = 42
@@ -31,10 +33,11 @@ class TestNoTuples extends FreeSpec {
         b4 = 42
         c <- new TupleChecker(6)
       } yield a + b0 + c + b4
+      assert(r.a == 94)
     }
 
     "for too many bindings" in {
-      for {
+      val r = for {
         _ <- new TupleChecker(4)
         a = 0
         b = 1
@@ -62,7 +65,35 @@ class TestNoTuples extends FreeSpec {
         x = 23
         y = 24
         z = 25
-      } yield a + b
+        a0 = "0"
+        b0 = "1"
+        c0 = "2"
+        d0 = "3"
+        e0 = "4"
+        f0 = "5"
+        g0 = "6"
+        h0 = "7"
+        i0 = "8"
+        j0 = "9"
+        k0 = "10"
+        l0 = "11"
+        m0 = "12"
+        n0 = "13"
+        o0 = "14"
+        p0 = "15"
+        q0 = "16"
+        r0 = "17"
+        s0 = "18"
+        t0 = "19"
+        u0 = "20"
+        v0 = "21"
+        w0 = "22"
+        x0 = "23"
+        y0 = "24"
+        z0 = "25"
+      } yield s"$a$z$z0"
+
+      assert(r.a == "02525")
     }
   }
 }
