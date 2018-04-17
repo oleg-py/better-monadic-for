@@ -95,6 +95,15 @@ class TestNoTuples extends FreeSpec {
 
       assert(r.a == "02525")
     }
+
+    "for Either in 2.11" in {
+      def mkRight(a: Int): Either[String, Int] = Right(a)
+      for {
+        x <- mkRight(4).right
+        tmp = x * x
+        y <- mkRight(1).right
+      } yield tmp + y
+    }
   }
 }
 
