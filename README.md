@@ -8,12 +8,13 @@ A Scala compiler plugin to give patterns and for-comprehensions the love they de
 ## Getting started
 The plugin is available on Maven Central.
 ```
-addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.1.0")
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.0")
 ```
 Supports Scala 2.11 and 2.12.
 
-# Quick taste
-## Destructuring `Either` / `IO` / `Task` / `FlatMap[F]`
+# Features
+## Desugaring `for` patterns without `withFilter`s (`-P:bm4:no-filtering:y`)
+### Destructuring `Either` / `IO` / `Task` / `FlatMap[F]`
 
 This plugin lets you do:
 ```
@@ -66,7 +67,7 @@ getCounts.map((x: String) => s"Count was $x")
 
 This also works with `flatMap` and `foreach`, of course.
 
-## No silent truncation of data
+### No silent truncation of data
 
 This example is taken from [Scala warts post](http://www.lihaoyi.com/post/WartsoftheScalaProgrammingLanguage.html#conflating-total-destructuring-with-partial-pattern-matching) by @lihaoyi
 ```
@@ -79,7 +80,7 @@ Seq(1 -> 2, 3 -> 4, 5).map{case (a, b) => a + " " + b}
 
 With the plugin, both versions are equivalent and result in `MatchError`
 
-## Match warnings
+### Match warnings
 Generators will now show exhaustivity warnings now whenever regular pattern matches would:
 
 ```
@@ -95,6 +96,35 @@ D:\Code\better-monadic-for\src\test\scala\com\olegpy\TestFor.scala:66
 [warn]         for (Some(x) <- IO(none[Int])) yield x
 [warn]                      ^
 ```
+
+## Final map optimization (`-P:bm4:no-map-id:y`)
+
+Eliminate calls to `.map` in comprehensions like this:
+
+```scala
+for {
+  x <- xs
+  y <- getYs(x)
+} yield y
+```
+
+Standard desugaring is
+
+```scala
+xs.flatMap(x => getYs(x).map(y => y))
+```
+
+This plugin simplifies it to
+
+```scala
+xs.flatMap(x => getYs(x))
+```
+
+## Desugar bindings as vals instead of tuples (`-P:bm4:no-tupling:y`)
+
+Direct fix for [lampepfl/dotty#2573].
+If the binding is not used in follow-up `withFilter`, it is desugared as
+plain `val`s, saving on allocations and primitive boxing.
 
 # Notes
 - This plugin introduces no extra identifiers. It only affects the behavior of for-comprehension.
