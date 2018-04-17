@@ -122,7 +122,7 @@ xs.flatMap(x => getYs(x))
 
 ## Desugar bindings as vals instead of tuples (`-P:bm4:no-tupling:y`)
 
-Direct fix for [lampepfl/dotty#2573].
+Direct fix for lampepfl/dotty#2573.
 If the binding is not used in follow-up `withFilter`, it is desugared as
 plain `val`s, saving on allocations and primitive boxing.
 
