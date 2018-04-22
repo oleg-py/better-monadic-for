@@ -8,7 +8,7 @@ A Scala compiler plugin to give patterns and for-comprehensions the love they de
 ## Getting started
 The plugin is available on Maven Central.
 ```
-addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.0")
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.1")
 ```
 Supports Scala 2.11 and 2.12.
 

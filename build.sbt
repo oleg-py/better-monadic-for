@@ -1,6 +1,6 @@
 name := "better-monadic-for"
 organization := "com.olegpy"
-version := "0.2.0"
+version := "0.2.1"
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("http://github.com/oleg-py/better-monadic-for"))
 
@@ -29,3 +29,4 @@ scalacOptions in Test ++= {
 
 
 //scalacOptions in Test += "-Xfatal-warnings"
+scalacOptions in Test += "-Ywarn-unused:locals"

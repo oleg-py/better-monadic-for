@@ -1,5 +1,6 @@
 package com.olegpy.bm4
 
+
 trait NoTupleBinding extends TreeUtils {
   import global._
   def noTupling: Boolean
@@ -7,9 +8,17 @@ trait NoTupleBinding extends TreeUtils {
   object NoTupleBinding {
     def unapply(arg: Tree): Option[Tree] = arg match {
       case _ if !noTupling => None
-      case TupleBinding(Tupled(main, method, param, vals, result)) =>
+      case TupleBinding(Tupled(main, method, param, vals, used, result)) =>
+        val usedVal: Set[String] = used.collect {
+          case Bind(TermName(str), _) => str
+        }.toSet
+        val noUnusedVals = vals.mapConserve {
+          case ValDef(_, TermName(s), _, rhs) if !usedVal(s) => rhs
+          case a => a
+        }
+
         val rewrite =
-          q"$main.$method(($param) => { ..$vals; $result })"
+          q"$main.$method(($param) => { ..$noUnusedVals; $result })"
         Some(replaceTree(arg, rewrite))
 
       case _ => None
@@ -21,6 +30,7 @@ trait NoTupleBinding extends TreeUtils {
     method: TermName,
     param: Tree,
     vals: List[Tree],
+    usedNames: Tree,
     result: Tree
   )
 
@@ -31,11 +41,14 @@ trait NoTupleBinding extends TreeUtils {
       _,
       _,
       vals,
+      _,
       TuplerBlock(moreVals)
-      )),  TermName("map")), Untupler(ret) :: Nil) =>
-        Some(td.copy(vals = vals ::: moreVals, result = ret))
-      case q"$main.map(${Tupler(param, vals)}).$m(${Untupler(tree)})" if ForArtifact(arg) =>
-        Some(Tupled(main, m, param, vals, tree))
+      )),  TermName("map")), Untupler(used, ret) :: Nil) =>
+        Some(td.copy(vals = vals ::: moreVals, result = ret, usedNames = used))
+
+      case q"$main.map(${Tupler(param, vals)}).$m(${Untupler(used, tree)})" if ForArtifact(arg) =>
+        Some(Tupled(main, m, param, vals, used, tree))
+
       case _ =>
         None
     }
@@ -70,11 +83,11 @@ trait NoTupleBinding extends TreeUtils {
   }
 
   object Untupler {
-    def unapply(arg: Tree): Option[Tree] = arg match {
+    def unapply(arg: Tree): Option[(Tree, Tree)] = arg match {
       case Function(_ :: Nil, Match(_,
-        CaseDef(_, _, body) :: Nil
+        CaseDef(pat, _, body) :: Nil
       )) =>
-        Some(body)
+        Some((pat, body))
       case _ =>
         None
     }
