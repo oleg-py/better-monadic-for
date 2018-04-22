@@ -7,7 +7,7 @@ A Scala compiler plugin to give patterns and for-comprehensions the love they de
 
 ## Getting started
 The plugin is available on Maven Central.
-```
+```sbt
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.1")
 ```
 Supports Scala 2.11 and 2.12.
@@ -54,7 +54,7 @@ Supported values for flags:
 ### Destructuring `Either` / `IO` / `Task` / `FlatMap[F]`
 
 This plugin lets you do:
-```
+```scala
 import cats.implicits._
 import cats.effect.IO
 
@@ -66,7 +66,7 @@ for {
 ```
 
 With regular Scala, this desugars to:
-```
+```scala
 getCounts
   .withFilter((@unchecked _) match {
      case (x, y) => true
@@ -80,7 +80,7 @@ getCounts
 Which fails to compile, because `IO` does not define `withFilter`
 
 This plugin changes it to:
-```
+```scala
 getCounts
   .map(_ match { case (x, y) => x + y })
 ```
@@ -93,7 +93,7 @@ Removing both `withFilter` and `unchecked` on generated `map`. So the code just 
 
 Type ascriptions on left-hand side do not become an `isInstanceOf` check - which they do by default. E.g.
 
-```
+```scala
 def getThing: IO[String] = ???
 
 for {
@@ -103,7 +103,7 @@ for {
 
 would desugar directly to
 
-```
+```scala
 getCounts.map((x: String) => s"Count was $x")
 ```
 
@@ -112,7 +112,7 @@ This also works with `flatMap` and `foreach`, of course.
 ### No silent truncation of data
 
 This example is taken from [Scala warts post](http://www.lihaoyi.com/post/WartsoftheScalaProgrammingLanguage.html#conflating-total-destructuring-with-partial-pattern-matching) by @lihaoyi
-```
+```scala
 // Truncates 5
 for((a, b) <- Seq(1 -> 2, 3 -> 4, 5)) yield a + " " +  b
 
@@ -125,7 +125,7 @@ With the plugin, both versions are equivalent and result in `MatchError`
 ### Match warnings
 Generators will now show exhaustivity warnings now whenever regular pattern matches would:
 
-```
+```scala
         import cats.syntax.option._
 
         for (Some(x) <- IO(none[Int])) yield x
