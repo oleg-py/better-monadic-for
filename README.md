@@ -12,8 +12,45 @@ addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.1")
 ```
 Supports Scala 2.11 and 2.12.
 
+<details>
+<summary><strong>Available plugin options</strong></summary>
+  
+---
+All options have form of `-P:bm4:$feature:$flag`
+
+  
+| Feature                           | Flag (default)
+|-----------------------------------|------------------------
+| Desugaring without withFilter     | `-P:bm4:no-filtering:y`
+| Elimination of identity map       | `-P:bm4:no-map-id:y`
+| Elimination of tuples in bindings | `-P:bm4:no-tupling:y`
+
+  
+Supported values for flags:
+  - Disabling: `n`, `no`, `0`, `false`
+  - Enabling: `y`, `yes`, `1`, `true`
+  
+---
+  
+</details>
+
+<details>
+<summary><strong>Changelog</strong></summary>
+
+---
+
+| Version | Changes
+|---------|-------------------------------------------------------------------------------------------
+| 0.2.1   | Fixed: untupling with `-Ywarn-unused:locals` causing warnings on e.g. `_ = println()`.
+| 0.2.0   | Added optimizations: map elimination & untupling. Added plugin options.
+| 0.1.0   | Initial version featuring for desugaring without `withFilter`s.
+
+---
+
+</details>
+
 # Features
-## Desugaring `for` patterns without `withFilter`s (`-P:bm4:no-filtering:y`)
+## Desugaring `for` patterns without `withFilter`s
 ### Destructuring `Either` / `IO` / `Task` / `FlatMap[F]`
 
 This plugin lets you do:
@@ -49,7 +86,12 @@ getCounts
 ```
 Removing both `withFilter` and `unchecked` on generated `map`. So the code just works.
 
-As an added bonus, type ascriptions on left-hand side do not become an `isInstanceOf` check.
+<details>
+<summary><b>Additional Effects</b></summary>
+
+### Type ascriptions on LHS
+
+Type ascriptions on left-hand side do not become an `isInstanceOf` check - which they do by default. E.g.
 
 ```
 def getThing: IO[String] = ???
@@ -59,7 +101,7 @@ for {
 } yield s"Count was $x"
 ```
 
-desugars directly to
+would desugar directly to
 
 ```
 getCounts.map((x: String) => s"Count was $x")
@@ -97,7 +139,9 @@ D:\Code\better-monadic-for\src\test\scala\com\olegpy\TestFor.scala:66
 [warn]                      ^
 ```
 
-## Final map optimization (`-P:bm4:no-map-id:y`)
+</details>
+
+## Final map optimization
 
 Eliminate calls to `.map` in comprehensions like this:
 
@@ -120,7 +164,7 @@ This plugin simplifies it to
 xs.flatMap(x => getYs(x))
 ```
 
-## Desugar bindings as vals instead of tuples (`-P:bm4:no-tupling:y`)
+## Desugar bindings as vals instead of tuples
 
 Direct fix for [lampepfl/dotty#2573](https://github.com/lampepfl/dotty/issues/2573).
 If the binding is not used in follow-up `withFilter`, it is desugared as
@@ -129,8 +173,6 @@ plain `val`s, saving on allocations and primitive boxing.
 # Notes
 - This plugin introduces no extra identifiers. It only affects the behavior of for-comprehension.
 - Regular `if` guards are not affected, only generator arrows.
-
-
 
 # License
 MIT
