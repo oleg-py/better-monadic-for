@@ -105,6 +105,14 @@ class TestNoTuples extends FreeSpec {
       } yield tmp + y
     }
   }
+
+  "not break destructuring in bindings" in {
+    val opt = for {
+      tmp <- Option((1, 2))
+      (x, _) = tmp
+    } yield x
+    assert(opt.contains(1))
+  }
 }
 
 object TestNoTuples {
