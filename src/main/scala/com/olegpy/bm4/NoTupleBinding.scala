@@ -54,7 +54,7 @@ trait NoTupleBinding extends TreeUtils {
       )),  TermName("map")), Untupler(used, ret) :: Nil) =>
         Some(td.copy(vals = vals ::: moreVals, result = ret, usedNames = used))
 
-      case q"$main.map(${Tupler(param, vals)}).$m(${Untupler(used, tree)})" if ForArtifact(arg) =>
+      case q"$main.map(${Tupler(param, vals)}).${m @ Untuplable()}(${Untupler(used, tree)})" if ForArtifact(arg) =>
         Some(Tupled(main, m, param, vals, used, tree))
 
       case _ =>

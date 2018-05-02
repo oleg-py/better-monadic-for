@@ -113,6 +113,20 @@ class TestNoTuples extends FreeSpec {
     } yield x
     assert(opt.contains(1))
   }
+
+  "not break if guards" in {
+    val ns = for {
+      n <- List(1,2,3)
+      plusOne = n + 1
+      if plusOne - 1 == 2
+    } yield plusOne
+
+    val res = for {
+      bool <- List(true, false, false, true)
+      bool2 = !bool
+      if bool2
+    } yield bool2
+  }
 }
 
 object TestNoTuples {
