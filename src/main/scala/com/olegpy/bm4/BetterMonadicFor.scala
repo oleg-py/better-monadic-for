@@ -77,7 +77,7 @@ class ForRewriter(plugin: BetterMonadicFor, val global: Global)
   override val noUncheckedFilter: Boolean = plugin.noUncheckedFilter
 
   val runsAfter = "parser" :: Nil
-  override val runsRightAfter = runsAfter
+  override val runsRightAfter = Some("parser")
   override val runsBefore = "namer" :: Nil
   val phaseName = "bm4-parser"
 
@@ -136,6 +136,7 @@ class TupleRemover(plugin: BetterMonadicFor, val global: Global)
   def noTupling: Boolean = plugin.noTupling
   val phaseName: String = "bm4-parser2"
   val runsAfter: List[String] = "parser" :: "bm4-parser" :: Nil
+  override val runsRightAfter: Option[String] = Some("bm4-parser")
   override val runsBefore: List[String] = "patmat" :: Nil
 
   class TupleRemoveTransformer(unit: CompilationUnit)
