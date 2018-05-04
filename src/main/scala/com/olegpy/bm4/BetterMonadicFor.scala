@@ -77,6 +77,7 @@ class ForRewriter(plugin: BetterMonadicFor, val global: Global)
   override val noUncheckedFilter: Boolean = plugin.noUncheckedFilter
 
   val runsAfter = "parser" :: Nil
+  override val runsRightAfter = runsAfter
   override val runsBefore = "namer" :: Nil
   val phaseName = "bm4-parser"
 
