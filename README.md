@@ -8,7 +8,7 @@ A Scala compiler plugin to give patterns and for-comprehensions the love they de
 ## Getting started
 The plugin is available on Maven Central.
 ```sbt
-addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.3")
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")
 ```
 Supports Scala 2.11 and 2.12.
 
@@ -41,6 +41,7 @@ Supported values for flags:
 
 | Version | Changes
 |---------|-------------------------------------------------------------------------------------------
+| 0.2.4   | Fixed: incompatibility with [Dsl.scala](https://github.com/ThoughtWorksInc/Dsl.scala)
 | 0.2.3   | Fixed: if-guards were broken when using untupling
 | 0.2.2   | Fixed: destructuring within for bindings `(bar, baz) = foo`
 | 0.2.1   | Fixed: untupling with `-Ywarn-unused:locals` causing warnings on e.g. `_ = println()`.
