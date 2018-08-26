@@ -19,11 +19,13 @@ class BetterMonadicFor(val global: Global) extends Plugin {
   var noUncheckedFilter = true
   var noMapIdentity     = true
   var noTupling         = true
+  var implicitPatterns  = true
 
   val knobs = Map(
     "no-filtering" -> "Remove .withFilter from generator desugaring",
-    "no-map-id"    -> "Optimize .map(x => x) and .map(_ => ())",
-    "no-tupling"   -> "Not implemented yet"
+    "no-map-id"    -> "Remove .map(x => x) and .map(_ => ())",
+    "no-tupling"   -> "Change desugaring of = bindings to not use tuples where possible",
+    "implicit-patterns" -> "Enable syntax for implicit definitions inside patterns"
   )
 
 
@@ -61,6 +63,7 @@ class BetterMonadicFor(val global: Global) extends Plugin {
       case "no-filtering" => noUncheckedFilter = toBoolean(value)
       case "no-map-id"    => noMapIdentity     = toBoolean(value)
       case "no-tupling"   => noTupling         = toBoolean(value)
+      case "implicit-patterns" => implicitPatterns = toBoolean(value)
     }
 
     noUncheckedFilter || noMapIdentity || noTupling
@@ -69,11 +72,12 @@ class BetterMonadicFor(val global: Global) extends Plugin {
 
 class ForRewriter(plugin: BetterMonadicFor, val global: Global)
   extends PluginComponent with Transform with TypingTransformers
-    with NoUncheckedFilter
+    with NoUncheckedFilter with ImplicitPatterns
 {
 
   import global._
 
+  override val implicitPatterns: Boolean = plugin.implicitPatterns
   override val noUncheckedFilter: Boolean = plugin.noUncheckedFilter
 
   val runsAfter = "parser" :: Nil
@@ -88,6 +92,8 @@ class ForRewriter(plugin: BetterMonadicFor, val global: Global)
     override def transform(tree: Tree): Tree = tree match {
       case NoUncheckedFilter(cleaned) =>
         transform(cleaned)
+      case ImplicitPatternDefinition(updated) =>
+        transform(updated)
       case _ =>
         super.transform(tree)
     }
