@@ -77,7 +77,7 @@ class ForRewriter(plugin: BetterMonadicFor, val global: Global)
 
   import global._
 
-  override val implicitPatterns: Boolean = plugin.implicitPatterns
+  override def implicitPatterns: Boolean = plugin.implicitPatterns
   override val noUncheckedFilter: Boolean = plugin.noUncheckedFilter
 
   val runsAfter = "parser" :: Nil

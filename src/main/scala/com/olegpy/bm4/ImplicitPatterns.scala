@@ -1,22 +1,39 @@
 package com.olegpy.bm4
 
+import scala.collection.mutable
+import scala.reflect.internal.{Definitions, SymbolTable}
 
-trait ImplicitPatterns extends TreeUtils {
+
+trait ImplicitPatterns extends TreeUtils { self =>
   import global._
 
   def implicitPatterns: Boolean
 
+
+
   object ImplicitPatternDefinition {
-    def unapply(tree: Tree): Option[CaseDef] = tree match {
+    lazy val ut = new NoTupleBinding {
+      val noTupling: Boolean = false
+      lazy val global = self.global
+    }
+
+    def unapply(tree: Tree): Option[Tree] = tree match {
       case _ if !implicitPatterns =>
         None
       case CaseDef(ImplicitPatternVals(patterns, valDefns), guard, body) =>
         val newGuard = if (guard.isEmpty) guard else q"{..$valDefns; $guard}"
-        println(q"{..$valDefns; $body}")
         Some(replaceTree(
           tree,
           CaseDef(patterns, newGuard, q"{..$valDefns; $body}")
         ))
+
+      case q"$main.map(${tupler @ ut.Tupler(_, _)}).${m @ ut.Untuplable()}(${body @ ut.Untupler(_, _)})" if ForArtifact(tree) =>
+        body match {
+          case Function(_, Match(_, List(ImplicitPatternVals(_, _)))) =>
+            abort("GOT TUPLED")
+          case _ => None
+        }
+
       case _ =>
         None
     }
@@ -36,12 +53,19 @@ trait ImplicitPatterns extends TreeUtils {
     }
   }
 
-  object HasImplicitPattern {
-    def unapply(arg: Tree): Boolean = arg.exists {
+  object ImplicitPatCheck {
+    def unapply(arg: Tree): Option[TermName] = arg match {
       // TODO: support implicit0(x: Type)
-      case q"implicit0(${t: TermName})" if t != termNames.WILDCARD => true
+      case q"implicit0(${t: TermName})" if t != termNames.WILDCARD => Some(t)
       case q"implicit0($_)" => abort("implicit pattern only supports identifier pattern")
       case q"implicit0(..$_)" => abort("implicit pattern only accepts a single parameter")
+      case _ => None
+    }
+  }
+
+  object HasImplicitPattern {
+    def unapply(arg: Tree): Boolean = arg.exists {
+      case ImplicitPatCheck(_) => true
       case _ => false
     }
   }
