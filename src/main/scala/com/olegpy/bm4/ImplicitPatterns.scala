@@ -17,6 +17,28 @@ trait ImplicitPatterns extends TreeUtils { self =>
       lazy val global = self.global
     }
 
+    def embedImplicitDefs(tupler: Tree, defns: List[ValDef]): Tree = {
+      val identMap = defns.map {
+        case vd @ ValDef(_, _, SingletonTypeTree(Ident(TermName(ident))), _) =>
+          ident -> vd
+      }.toMap
+
+      tupler match {
+        case Function(vp, Block(valDefns, expr)) =>
+          val withImplicits = valDefns.flatMap {
+            case vd @ ValDef(_, TermName(nm), _, _) if identMap contains nm =>
+              vd :: identMap(nm) :: Nil
+            case vd =>
+              vd :: Nil
+          }
+
+          Function(vp, Block(withImplicits, expr))
+
+        case other =>
+          other
+      }
+    }
+
     def unapply(tree: Tree): Option[Tree] = tree match {
       case _ if !implicitPatterns =>
         None
@@ -29,8 +51,10 @@ trait ImplicitPatterns extends TreeUtils { self =>
 
       case q"$main.map(${tupler @ ut.Tupler(_, _)}).${m @ ut.Untuplable()}(${body @ ut.Untupler(_, _)})" if ForArtifact(tree) =>
         body match {
-          case Function(_, Match(_, List(ImplicitPatternVals(_, _)))) =>
-            abort("GOT TUPLED")
+          case Function(_, Match(_, List(ImplicitPatternVals(_, defns)))) =>
+            val t = embedImplicitDefs(tupler, defns)
+            val replacement = q"$main.map($t).$m($body)"
+            Some(replaceTree(tree, replacement))
           case _ => None
         }
 

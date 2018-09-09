@@ -23,13 +23,13 @@ class TestImplicitPatterns extends FreeSpec {
 
         "as = binding" - {
           "followed by multiple = bindings" in {
-//            for {
-//              x <- Option(42)
-//              _ <- Option("dummy")
-//              implicit0(it) = ImplicitTest("eggs")
-//              _ = "dummy"
-//              _ = assert(implicitly[ImplicitTest] eq it)
-//            } yield "ok"
+            for {
+              x <- Option(42)
+              _ <- Option("dummy")
+              implicit0(it) = ImplicitTest("eggs")
+              _ = "dummy"
+              _ = assert(implicitly[ImplicitTest] eq it)
+            } yield "ok"
           }
 
           "followed by <- bindings then = bindings" in {
