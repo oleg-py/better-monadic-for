@@ -14,7 +14,7 @@ trait ImplicitPatterns extends TreeUtils { self =>
   object ImplicitPatternDefinition {
     lazy val ut = new NoTupleBinding {
       val noTupling: Boolean = false
-      lazy val global = self.global
+      lazy val global: self.global.type = self.global
     }
 
     def embedImplicitDefs(tupler: Tree, defns: List[ValDef]): Tree = {
@@ -81,8 +81,12 @@ trait ImplicitPatterns extends TreeUtils { self =>
     def unapply(arg: Tree): Option[TermName] = arg match {
       // TODO: support implicit0(x: Type)
       case q"implicit0(${t: TermName})" if t != termNames.WILDCARD => Some(t)
-      case q"implicit0($_)" => abort("implicit pattern only supports identifier pattern")
-      case q"implicit0(..$_)" => abort("implicit pattern only accepts a single parameter")
+      case q"implicit0($_)" =>
+        reporter.error(arg.pos, "implicit pattern only supports identifier pattern")
+        None
+      case q"implicit0(..$_)" =>
+        reporter.error(arg.pos, "implicit pattern only accepts a single parameter")
+        None
       case _ => None
     }
   }
