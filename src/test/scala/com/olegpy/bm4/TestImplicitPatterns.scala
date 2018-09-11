@@ -4,9 +4,10 @@ import org.scalatest.FreeSpec
 
 class TestImplicitPatterns extends FreeSpec {
   case class ImplicitTest(id: String)
+  case class ImplicitTest2(id: String)
 
   // Make IDE happy
-  object implicit0 { def unapply[A](a: A) = Some(a) }
+//  object implicit0 { def unapply[A](a: A) = Some(a) }
 
   "Implicit patterns support" - {
     "for-comprehensions" - {
@@ -49,6 +50,15 @@ class TestImplicitPatterns extends FreeSpec {
               implicit0(it) = ImplicitTest("eggs")
               _ = assert(implicitly[ImplicitTest] eq it)
               _ <- Option("dummy")
+            } yield "ok"
+          }
+
+          "with multiple implicit variables" in {
+            for {
+              implicit0(it1) <- Option(ImplicitTest2("42"))
+              implicit0(it) = ImplicitTest("eggs")
+              _ = assert(implicitly[ImplicitTest] eq it)
+              _ = assert(implicitly[ImplicitTest2] eq it1)
             } yield "ok"
           }
         }
