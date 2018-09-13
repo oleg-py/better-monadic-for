@@ -19,7 +19,7 @@ trait ImplicitPatterns extends TreeUtils { self =>
 
     def embedImplicitDefs(tupler: Tree, defns: List[ValDef]): Tree = {
       val identMap = defns.map {
-        case vd @ ValDef(_, _, SingletonTypeTree(Ident(TermName(ident))), _) =>
+        case vd @ ValDef(_, TermName(nm), _, Ident(TermName(ident))) if nm contains "$implicit" =>
           ident -> vd
       }.toMap
 
@@ -81,13 +81,22 @@ trait ImplicitPatterns extends TreeUtils { self =>
     }
   }
 
+  private def mkValDef(nm: String, tnm: Tree): ValDef = {
+    implicit val fnc = currentFreshNameCreator
+    ValDef(
+      Modifiers(Flag.IMPLICIT | Flag.ARTIFACT | Flag.SYNTHETIC),
+      freshTermName(nm + "$implicit$"),
+      tnm,
+      Ident(TermName(nm))
+    )
+  }
+
   object ImplicitPatternVals {
     def unapply(arg: Tree): Option[(Tree, List[ValDef])] = arg match {
       case HasImplicitPattern() =>
         val vals = arg.collect {
-          case q"implicit0(${Bind(TermName(nm), _)})" =>
-            implicit val fnc = currentFreshNameCreator
-            ValDef(Modifiers(Flag.IMPLICIT), freshTermName(nm + "$implicit$"), SingletonTypeTree(Ident(TermName(nm))), Ident(TermName(nm)))
+          case q"implicit0(${Bind(TermName(nm), Typed(_, tpt))})" =>
+            mkValDef(nm, tpt)
         }
         // We're done with implicit0 "keyword", exterminate it
         Some((StripImplicitZero.transform(arg), vals))
@@ -95,31 +104,24 @@ trait ImplicitPatterns extends TreeUtils { self =>
     }
   }
 
-  object ImplicitPatCheck {
-    def unapply(arg: Tree): Option[TermName] = arg match {
-      // TODO: support implicit0(x: Type)
-      case q"implicit0(${t: TermName})" if t != termNames.WILDCARD => Some(t)
-      case q"implicit0(${Bind(t: TermName, Ident(termNames.WILDCARD))})" if t != termNames.WILDCARD => Some(t)
-      case q"implicit0($_)" =>
-        reporter.error(arg.pos, "implicit pattern only supports identifier pattern")
-        None
-      case q"implicit0(..$_)" =>
-        reporter.error(arg.pos, "implicit pattern only accepts a single parameter")
-        None
-      case _ => None
-    }
-  }
-
   object HasImplicitPattern {
     def unapply(arg: Tree): Boolean = arg.exists {
-      case ImplicitPatCheck(_) => true
-      case _ => false
+      case q"implicit0(${Bind(t: TermName, Typed(Ident(termNames.WILDCARD), _))})" if t != termNames.WILDCARD =>
+        true
+      case q"implicit0($_)" =>
+        reporter.error(arg.pos, "implicit pattern only supports identifier with type pattern")
+        false
+      case q"implicit0(..$_)" =>
+        reporter.error(arg.pos, "implicit pattern only accepts a single parameter")
+        false
+      case _ =>
+        false
     }
   }
 
   object StripImplicitZero extends Transformer {
     override def transform(tree: Tree): Tree = tree match {
-      case q"implicit0($x)" => super.transform(x)
+      case q"implicit0(${Bind(t: TermName, _)})" => super.transform(Bind(t, Ident(termNames.WILDCARD)))
       case _ => super.transform(tree)
     }
   }
@@ -129,9 +131,8 @@ trait ImplicitPatterns extends TreeUtils { self =>
       vd.rhs match {
         case Match(_, CaseDef(pat, _, _) :: Nil) if vd.mods.hasFlag(Flag.ARTIFACT) =>
           val vd = pat.collect {
-            case q"implicit0(${Bind(TermName(nm), _)})" =>
-              implicit val fnc = currentFreshNameCreator
-              ValDef(Modifiers(Flag.IMPLICIT), freshTermName(nm + "$implicit$"), SingletonTypeTree(Ident(TermName(nm))), Ident(TermName(nm)))
+            case q"implicit0(${Bind(TermName(nm), Typed(_, tpt))})" =>
+              mkValDef(nm, tpt)
           }
           if (vd.nonEmpty) Some(vd) else None
         case _ => None
