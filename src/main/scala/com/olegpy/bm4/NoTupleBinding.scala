@@ -25,8 +25,12 @@ trait NoTupleBinding extends TreeUtils {
           case a => a
         }
 
+        val param2 =
+          if (param.name.containsChar('$')) param.copy(param.mods & Flag.SYNTHETIC & Flag.ARTIFACT)
+          else param
+
         val rewrite =
-          q"$main.$method(($param) => { ..$noUnusedVals; $result })"
+          q"$main.$method(($param2) => { ..$noUnusedVals; $result })"
         Some(replaceTree(arg, rewrite))
 
       case _ => None
@@ -36,7 +40,7 @@ trait NoTupleBinding extends TreeUtils {
   case class Tupled(
     main: Tree,
     method: TermName,
-    param: Tree,
+    param: ValDef,
     vals: List[Tree],
     usedNames: Tree,
     result: Tree

@@ -1,11 +1,11 @@
 name := "better-monadic-for"
 organization := "com.olegpy"
-version := "0.3.0-M2"
+version := "0.3.0-M3"
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("http://github.com/oleg-py/better-monadic-for"))
 
-scalaVersion := "2.12.5"
-crossScalaVersions := Seq("2.11.12", "2.12.5")
+scalaVersion := "2.12.7"
+crossScalaVersions := Seq("2.11.12", "2.12.7")
 libraryDependencies ++= Seq(
   scalaOrganization.value % "scala-compiler" % scalaVersion.value,
   "org.scalatest" %% "scalatest" % "3.0.5" % Test,
@@ -30,3 +30,4 @@ scalacOptions in Test ++= {
 
 //scalacOptions in Test += "-Xfatal-warnings"
 scalacOptions in Test += "-Ywarn-unused:locals"
+scalacOptions in Test += "-Ywarn-unused:params"

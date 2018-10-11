@@ -23,18 +23,18 @@ class TestNoTuples extends FreeSpec {
       assert(r.a == 52)
     }
 
-//    "for multiple bindings" in {
-//      val r = for {
-//        a <- new TupleChecker(4)
-//        b0 = 42
-//        b1 = 42
-//        b2 = 42
-//        b3 = 42
-//        b4 = 42
-//        c <- new TupleChecker(6)
-//      } yield a + b0 + c + b4
-//      assert(r.a == 94)
-//    }
+    "for multiple bindings" in {
+      val r = for {
+        a <- new TupleChecker(4)
+        b0 = 42
+        b1 = 42
+        b2 = 42
+        b3 = 42
+        b4 = 42
+        c <- new TupleChecker(6)
+      } yield a + b0 - b1 + b2 + c - b3 + b4
+      assert(r.a == 52)
+    }
 //
 //    "for too many bindings" in {
 //      val r = for {
