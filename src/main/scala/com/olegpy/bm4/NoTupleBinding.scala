@@ -1,5 +1,7 @@
 package com.olegpy.bm4
 
+import scala.reflect.internal.util.FreshNameCreator
+
 
 trait NoTupleBinding extends TreeUtils {
   import global._
@@ -25,8 +27,9 @@ trait NoTupleBinding extends TreeUtils {
           case a => a
         }
 
+        // Retrofit synthetic/artifact flags for people using -Xwarn-unused:params
         val param2 =
-          if (param.name.containsChar('$')) param.copy(param.mods & Flag.SYNTHETIC & Flag.ARTIFACT)
+          if (param.name.containsChar('$')) param.copy(param.mods | Flag.SYNTHETIC | Flag.ARTIFACT)
           else param
 
         val rewrite =
