@@ -8,7 +8,7 @@ A Scala compiler plugin to give patterns and for-comprehensions the love they de
 ## Getting started
 The plugin is available on Maven Central.
 ```sbt
-addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.2.4")
+addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0-M4")
 ```
 Supports Scala 2.11 and 2.12.
 
@@ -24,7 +24,7 @@ All options have form of `-P:bm4:$feature:$flag`
 | Desugaring without withFilter     | `-P:bm4:no-filtering:y`
 | Elimination of identity map       | `-P:bm4:no-map-id:y`
 | Elimination of tuples in bindings | `-P:bm4:no-tupling:y`
-
+| Implicit definining patterns      | `-P:bm4:implicit-patterns:y`
   
 Supported values for flags:
   - Disabling: `n`, `no`, `0`, `false`
@@ -41,6 +41,9 @@ Supported values for flags:
 
 | Version | Changes
 |---------|-------------------------------------------------------------------------------------------
+| 0.3.0-M4| Fix anonymous variables in Scala 2.12.7+
+| M2, M3  | Fixes for implicit patterns
+| 0.3.0-M1| Initial implementation of implicit patterns
 | 0.2.4   | Fixed: incompatibility with [Dsl.scala](https://github.com/ThoughtWorksInc/Dsl.scala)
 | 0.2.3   | Fixed: if-guards were broken when using untupling
 | 0.2.2   | Fixed: destructuring within for bindings `(bar, baz) = foo`
@@ -173,8 +176,33 @@ Direct fix for [lampepfl/dotty#2573](https://github.com/lampepfl/dotty/issues/25
 If the binding is not used in follow-up `withFilter`, it is desugared as
 plain `val`s, saving on allocations and primitive boxing.
 
+## Define implicits in for-comprehensions or matches
+
+Since version 0.3.0-M1, it is possible to define implicit values inside for-comprehensions using a new keyword `implicit0`:
+
+```scala
+case class ImplicitTest(id: String)
+
+for {
+  x <- Option(42)
+  implicit0(it: ImplicitTest) <- Option(ImplicitTest("eggs"))
+  _ <- Option("dummy")
+  _ = "dummy"
+  _ = assert(implicitly[ImplicitTest] eq it)
+} yield "ok"
+```
+
+In current version (0.3.0-M4) it's required to specify a type annotation in a pattern with `implicit0`.
+
+It also works in regular match clauses:
+```scala
+(1, "foo", ImplicitTest("eggs")) match {
+  case (_, "foo", implicit0(it: ImplicitTest)) => assert(implicitly[ImplicitTest] eq it)
+}
+```
+
 # Notes
-- This plugin introduces no extra identifiers. It only affects the behavior of for-comprehension.
+- This plugin reserves one extra keyword, `implicit0`, if corresponding option for implicit patterns is enabled (which is by default).
 - Regular `if` guards are not affected, only generator arrows.
 
 # License
