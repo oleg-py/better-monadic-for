@@ -1,8 +1,5 @@
 package com.olegpy.bm4
 
-import org.ensime.pcplod._
-import org.scalatest.FreeSpec
-
 class PresentationCompiler extends FreeSpec {
   "PC should have no errors" in {
     withMrPlod("Arrows.scala") { pc =>

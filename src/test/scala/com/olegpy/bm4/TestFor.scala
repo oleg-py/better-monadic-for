@@ -1,13 +1,8 @@
 package com.olegpy.bm4
 
-import scala.concurrent.Future
-import scala.concurrent.duration.Duration
-
 import cats.effect.IO
-import monix.execution.Scheduler.Implicits.global
-import monix.eval.Task
 import cats.implicits._
-import org.scalatest.{FreeSpec, FunSuite}
+import org.scalatest.FreeSpec
 
 
 
@@ -15,10 +10,10 @@ class TestFor extends FreeSpec {
   "Plugin allows" - {
     "destructuring for monads without withFilter" in {
       val task = for {
-        (a, b) <- Task.zip2(Task("Hello"), Task("there"))
+        (a, b) <- (IO("Hello"), IO("there")).tupled
       } yield s"$a $b"
 
-      assert(task.runSyncUnsafe(Duration.Inf) == "Hello there")
+      assert(task.unsafeRunSync() == "Hello there")
     }
 
     "also with lots of generators inside" - {
@@ -34,13 +29,13 @@ class TestFor extends FreeSpec {
 
     "and with nested for-s" in {
       val task = for {
-        (a, b) <- Task.zip2(Task("Hello"), Task("there"))
+        (a, b) <- (IO("Hello"), IO("there")).tupled
         txt = s"$a $b!"
         io = for ((c, d) <- IO(("General", "Kenobi"))) yield s"$c $d!"
-        txt2 <- io.to[Task]
+        txt2 <- io.to[IO]
       } yield s"$txt $txt2"
 
-      assert(task.runSyncUnsafe(Duration.Inf) == "Hello there! General Kenobi!")
+      assert(task.unsafeRunSync() == "Hello there! General Kenobi!")
     }
 
     "easy type patterns on left hand side" - {
