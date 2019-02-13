@@ -4,8 +4,8 @@ version := "0.3.0-M4"
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("http://github.com/oleg-py/better-monadic-for"))
 
-scalaVersion := "2.12.7"
-crossScalaVersions := Seq("2.11.12", "2.12.7", "2.13.0-M5")
+scalaVersion := "2.12.8"
+crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0-M5")
 libraryDependencies ++= Seq(
   scalaOrganization.value % "scala-compiler" % scalaVersion.value,
   "org.scalatest" %% "scalatest" % "3.0.6-SNAP5" % Test,
