@@ -2,41 +2,11 @@ package com.olegpy.bm4
 
 import org.scalatest.FreeSpec
 
-trait FlatMap[F[_]] {
-  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
-  def map[A, B](fa: F[A])(f: A => B): F[B]
-}
-trait FlatMapOps[F[_], A] {
-  def self: F[A]
-  def instance: FlatMap[F]
-  def flatMap[B](f: A => F[B]): F[B] =
-    instance.flatMap(self)(f)
-  def map[B](f: A => B): F[B] =
-    instance.map(self)(f)
-}
-object syntax {
-  implicit def toFlatMapOps[F[_], A](fa: F[A])(implicit F: FlatMap[F]): FlatMapOps[F, A] =
-    new FlatMapOps[F, A] {
-      def self = fa
-      def instance = F
-    }
-}
-
 case class MapCalled() extends Exception
 
 class MapCheck[+A](a: A) {
   def map[B](f: A => B): MapCheck[B] = throw MapCalled()
   def flatMap[B](f: A => MapCheck[B]): MapCheck[B] = f(a)
-}
-
-object MapCheck {
-  implicit val instance: FlatMap[MapCheck] = new FlatMap[MapCheck] {
-    def flatMap[A, B](fa: MapCheck[A])(f: A => MapCheck[B]): MapCheck[B] = {
-      fa.flatMap(f)
-    }
-
-    def map[A, B](fa: MapCheck[A])(f: A => B): MapCheck[B] = fa.map(f)
-  }
 }
 
 class TestNoMap extends FreeSpec {
@@ -83,17 +53,5 @@ class TestNoMap extends FreeSpec {
     intercept[MapCalled] {
       new MapCheck(()).flatMap(y => new MapCheck(()).map(x => x))
     }
-  }
-
-  "works in generic context with extension methods of cats" in {
-    import syntax._
-
-    def sillyTest[F[_]: FlatMap](fa: F[Int], fb: F[Int]) =
-      for {
-        _ <- fa
-        b <- fb
-      } yield b
-
-    sillyTest(new MapCheck(11), new MapCheck(42))
   }
 }
