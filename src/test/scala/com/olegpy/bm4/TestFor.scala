@@ -3,52 +3,68 @@ package com.olegpy.bm4
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-import cats.effect.IO
-import monix.execution.Scheduler.Implicits.global
-import monix.eval.Task
-import cats.implicits._
 import org.scalatest.{FreeSpec, FunSuite}
 
+/** Mo is a lazy monad without `withFilter` */
+sealed trait Mo[A] {
+  import Mo._
+  def map[B](f: A => B): Mo[B] = Return(() => f(value))
+  def flatMap[B](f: A => Mo[B]): Mo[B] = Suspend(() => f(value))
+  def value: A = this match {
+    case Return(a) => a()
+    case Suspend(fa) => fa().value
+  }
+}
+object Mo {
+  case class Return[A](a: () => A) extends Mo[A]
+  case class Suspend[A](fa: () => Mo[A]) extends Mo[A]
 
+  def apply[A](a: A): Mo[A] = delay(a)
+  def delay[A](a: => A): Mo[A] = Return(() => a)
+  def zip2[A, B](la: Mo[A], lb: Mo[B]): Mo[(A, B)] =
+    la.flatMap(a => lb.flatMap(b => Mo((a, b))))
+  val unit: Mo[Unit] = Mo(())
+}
 
 class TestFor extends FreeSpec {
+
   "Plugin allows" - {
     "destructuring for monads without withFilter" in {
-      val task = for {
-        (a, b) <- Task.zip2(Task("Hello"), Task("there"))
+      val mo = for {
+        (a, b) <- Mo.zip2(Mo("Hello"), Mo("there"))
       } yield s"$a $b"
 
-      assert(task.runSyncUnsafe(Duration.Inf) == "Hello there")
+      assert(mo.value == "Hello there")
     }
 
     "also with lots of generators inside" - {
-      val io = for {
-        _ <- IO.unit
-        (a, b) <- IO((1, 2))
-        _ <- IO.unit
-        s <- IO("Output")
-        Some(sep) <- IO(Some(": "))
+      val mo = for {
+        _ <- Mo.unit
+        (a, b) <- Mo((1, 2))
+        _ <- Mo.unit
+        s <- Mo("Output")
+        Some(sep) <- Mo(Some(": "))
       } yield s"$s$sep${a + b}"
-      assert(io.unsafeRunSync() == "Output: 3")
+      assert(mo.value == "Output: 3")
     }
 
     "and with nested for-s" in {
-      val task = for {
-        (a, b) <- Task.zip2(Task("Hello"), Task("there"))
+      val mo = for {
+        (a, b) <- Mo.zip2(Mo("Hello"), Mo("there"))
         txt = s"$a $b!"
-        io = for ((c, d) <- IO(("General", "Kenobi"))) yield s"$c $d!"
-        txt2 <- io.to[Task]
+        m = for ((c, d) <- Mo(("General", "Kenobi"))) yield s"$c $d!"
+        txt2 <- m
       } yield s"$txt $txt2"
 
-      assert(task.runSyncUnsafe(Duration.Inf) == "Hello there! General Kenobi!")
+      assert(mo.value == "Hello there! General Kenobi!")
     }
 
     "easy type patterns on left hand side" - {
-      "for one-liners" in (for (x: Int <- IO(42)) yield x)
+      "for one-liners" in (for (x: Int <- Mo(42)) yield x)
       "for multiple lines" in {
         for {
-          x: Int <- IO(42)
-          s: String <- IO("Foo")
+          x: Int <- Mo(42)
+          s: String <- Mo("Foo")
         } yield s + x
       }
     }
@@ -57,7 +73,7 @@ class TestFor extends FreeSpec {
       object A {
         class B {
           val c: Unit = {
-            def localMethod = for (x: Int <- IO(42)) yield x
+            def localMethod = for (x: Int <- Mo(42)) yield x
             ()
           }
         }
@@ -68,11 +84,11 @@ class TestFor extends FreeSpec {
   // TODO: utest compileError does not use plugin
   "exhaustiveness checks" - {
     "option" in {
-      for (Some(x) <- IO(none[Int])) yield x
+      for (Some(x) <- Mo.delay(Option.empty[Int])) yield x
     }
     "lists & singletons" in {
       object Singleton
-      for (Singleton <- IO(Singleton); (a, Nil) <- IO((1, List(1)))) yield a
+      for (Singleton <- Mo(Singleton); (a, Nil) <- Mo((1, List(1)))) yield a
     }
   }
 
