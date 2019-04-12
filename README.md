@@ -10,7 +10,7 @@ The plugin is available on Maven Central.
 ```sbt
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0-M4")
 ```
-Supports Scala 2.11 and 2.12.
+Supports Scala 2.11, 2.12, and 2.13.0-RC1
 
 <details>
 <summary><strong>Available plugin options</strong></summary>

@@ -45,11 +45,28 @@ trait NoMapIdentity extends TreeUtils {
           mods.flags == ModifierFlags.PARAM &&
           (i.tpe =:= tpt.tpe) =>
         true
-      case Function(ValDef(_, _, tpt, EmptyTree) :: Nil, u @ Literal(Constant(())))
+      case Function(ValDef(_, _, tpt, EmptyTree) :: Nil, LiteralUnit(u))
         if tpt.tpe =:= definitions.UnitTpe && tpt.tpe =:= u.tpe =>
         true
       case _ =>
         false
+    }
+  }
+
+  object LiteralUnit {
+    def unapply(tree: Tree): Option[Tree] = tree match {
+      case u @ Literal(Constant(())) =>
+        Some(u)
+
+      // In Scala 2:13, we get `(x$1: Unit @unchecked) match { case _ => () }`
+      case u @ Match(Typed(Ident(TermName(x)), tpt),
+                     List(
+                       CaseDef(Ident(termNames.WILDCARD), EmptyTree, Literal(Constant(())))))
+        if tpt.tpe =:= definitions.UnitTpe =>
+        Some(u)
+
+      case _ =>
+        None
     }
   }
 }

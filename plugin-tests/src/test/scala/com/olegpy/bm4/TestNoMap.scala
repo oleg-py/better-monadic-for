@@ -9,26 +9,6 @@ class MapCheck[+A](a: A) {
   def flatMap[B](f: A => MapCheck[B]): MapCheck[B] = f(a)
 }
 
-object MapCheck {
-  implicit val catsInstance: cats.FlatMap[MapCheck] = new cats.FlatMap[MapCheck] {
-    def flatMap[A, B](fa: MapCheck[A])(f: A => MapCheck[B]): MapCheck[B] = {
-      fa.flatMap(f)
-    }
-
-    def tailRecM[A, B](a: A)(f: A => MapCheck[Either[A, B]]): MapCheck[B] = {
-      assert(false)
-      null
-    }
-    def map[A, B](fa: MapCheck[A])(f: A => B): MapCheck[B] = fa.map(f)
-  }
-
-  implicit val scalazInstance: scalaz.Bind[MapCheck] = new scalaz.Bind[MapCheck] {
-    def bind[A, B](fa: MapCheck[A])(f: A => MapCheck[B]): MapCheck[B] = fa.flatMap(f)
-
-    def map[A, B](fa: MapCheck[A])(f: A => B): MapCheck[B] = fa.map(f)
-  }
-}
-
 class TestNoMap extends FreeSpec {
   "emits no map(b => b) in for-comprehension" in {
     for {
@@ -73,27 +53,5 @@ class TestNoMap extends FreeSpec {
     intercept[MapCalled] {
       new MapCheck(()).flatMap(y => new MapCheck(()).map(x => x))
     }
-  }
-
-  "works in generic context with extension methods of cats" in {
-    import cats.syntax.all._
-    def sillyTest[F[_]: cats.FlatMap](fa: F[Int], fb: F[Int]) =
-      for {
-        _ <- fa
-        b <- fb
-      } yield b
-
-    sillyTest(new MapCheck(11), new MapCheck(42))
-  }
-
-  "works in generic context with extension methods of scalaz 7" in {
-    import scalaz._, Scalaz._
-    def sillyTest[F[_]: Bind](fa: F[Int], fb: F[Int]) =
-      for {
-        _ <- fa
-        b <- fb
-      } yield b
-
-    sillyTest(new MapCheck(11), new MapCheck(42))
   }
 }
