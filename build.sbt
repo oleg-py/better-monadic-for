@@ -67,7 +67,7 @@ lazy val pcplodTests = (project in file("pcplod-tests"))
 lazy val catsTests = (project in file("cats-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
-    name := "pcplod-tests",
+    name := "cats-tests",
     crossScalaVersions := List(scala211, scala212),
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.6.0" % Test
