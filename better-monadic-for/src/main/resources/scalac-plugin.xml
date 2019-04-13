@@ -1,0 +1,4 @@
+<plugin>
+    <name>bm4</name>
+    <classname>com.olegpy.bm4.BetterMonadicFor</classname>
+</plugin>
