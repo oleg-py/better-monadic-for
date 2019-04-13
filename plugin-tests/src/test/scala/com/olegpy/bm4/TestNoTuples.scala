@@ -32,69 +32,69 @@ class TestNoTuples extends FreeSpec {
         b3 = 42
         b4 = 42
         c <- new TupleChecker(6)
-      } yield a + b0 + c + b4
-      assert(r.a == 94)
+      } yield a + b0 - b1 + b2 + c - b3 + b4
+      assert(r.a == 52)
     }
-
-    "for too many bindings" in {
-      val r = for {
-        _ <- new TupleChecker(4)
-        a = 0
-        b = 1
-        c = 2
-        d = 3
-        e = 4
-        f = 5
-        g = 6
-        h = 7
-        i = 8
-        j = 9
-        k = 10
-        l = 11
-        m = 12
-        n = 13
-        o = 14
-        p = 15
-        q = 16
-        r = 17
-        s = 18
-        t = 19
-        u = 20
-        v = 21
-        w = 22
-        x = 23
-        y = 24
-        z = 25
-        a0 = "0"
-        b0 = "1"
-        c0 = "2"
-        d0 = "3"
-        e0 = "4"
-        f0 = "5"
-        g0 = "6"
-        h0 = "7"
-        i0 = "8"
-        j0 = "9"
-        k0 = "10"
-        l0 = "11"
-        m0 = "12"
-        n0 = "13"
-        o0 = "14"
-        p0 = "15"
-        q0 = "16"
-        r0 = "17"
-        s0 = "18"
-        t0 = "19"
-        u0 = "20"
-        v0 = "21"
-        w0 = "22"
-        x0 = "23"
-        y0 = "24"
-        z0 = "25"
-      } yield s"$a$z$z0"
-
-      assert(r.a == "02525")
-    }
+//
+//    "for too many bindings" in {
+//      val r = for {
+//        _ <- new TupleChecker(4)
+//        a = 0
+//        b = 1
+//        c = 2
+//        d = 3
+//        e = 4
+//        f = 5
+//        g = 6
+//        h = 7
+//        i = 8
+//        j = 9
+//        k = 10
+//        l = 11
+//        m = 12
+//        n = 13
+//        o = 14
+//        p = 15
+//        q = 16
+//        r = 17
+//        s = 18
+//        t = 19
+//        u = 20
+//        v = 21
+//        w = 22
+//        x = 23
+//        y = 24
+//        z = 25
+//        a0 = "0"
+//        b0 = "1"
+//        c0 = "2"
+//        d0 = "3"
+//        e0 = "4"
+//        f0 = "5"
+//        g0 = "6"
+//        h0 = "7"
+//        i0 = "8"
+//        j0 = "9"
+//        k0 = "10"
+//        l0 = "11"
+//        m0 = "12"
+//        n0 = "13"
+//        o0 = "14"
+//        p0 = "15"
+//        q0 = "16"
+//        r0 = "17"
+//        s0 = "18"
+//        t0 = "19"
+//        u0 = "20"
+//        v0 = "21"
+//        w0 = "22"
+//        x0 = "23"
+//        y0 = "24"
+//        z0 = "25"
+//      } yield s"$a$z$z0"
+//
+//      assert(r.a == "02525")
+//    }
 
     "for Either in 2.11" in {
       def mkRight(a: Int): Either[String, Int] = Right(a)

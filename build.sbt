@@ -1,10 +1,13 @@
+import xerial.sbt.Sonatype._
+
 lazy val scala213 = "2.13.0-RC1"
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
+
 lazy val supportedScalaVersions = List(scala211, scala212, scala213)
 
 ThisBuild / organization := "com.olegpy"
-ThisBuild / version := "0.2.4"
+ThisBuild / version := "0.3.0"
 ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / homepage := Some(url("http://github.com/oleg-py/better-monadic-for"))
 ThisBuild / scalaVersion := scala212
@@ -14,7 +17,7 @@ val testSettings = Seq(
     "org.scalatest" %% "scalatest" % "3.0.8-RC2" % Test
   ),
   Test / scalacOptions ++= {
-    val jar = (plugin / Compile / packageBin).value
+    val jar = (betterMonadicFor / Compile / packageBin).value
     Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile
   },
   Test / scalacOptions ++= {
@@ -27,23 +30,26 @@ val testSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(plugin, pluginTests, catsTests, pcplodTests)
+  .aggregate(betterMonadicFor, pluginTests, catsTests, scalazTests, pcplodTests)
   .settings(
     crossScalaVersions := Nil,
     publish / skip := true
   )
 
-lazy val plugin = (project in file("plugin"))
+lazy val betterMonadicFor = (project in file("better-monadic-for"))
   .settings(
     name := "better-monadic-for",
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Seq(
       scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-    )
+    ),
+    publishTo := sonatypePublishTo.value,
+    publishMavenStyle := true,
+    sonatypeProjectHosting := Some(GitHubHosting("oleg-py", "better-monadic-for", "oleg.pyzhcov@gmail.com")),
   )
 
 lazy val pluginTests = (project in file("plugin-tests"))
-  .dependsOn(plugin)
+  .dependsOn(betterMonadicFor)
   .settings(crossScalaVersions := supportedScalaVersions)
   .settings(testSettings)
 
@@ -71,6 +77,18 @@ lazy val catsTests = (project in file("cats-tests"))
     crossScalaVersions := List(scala211, scala212),
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "1.6.0" % Test
+    )
+  )
+  .settings(testSettings)
+
+
+lazy val scalazTests = (project in file("scalaz-tests"))
+  .dependsOn(pluginTests % "compile->compile;test->test")
+  .settings(
+    name := "scalaz-tests",
+    crossScalaVersions := List(scala211, scala212),
+    libraryDependencies ++= Seq(
+      "org.scalaz" %% "scalaz-core" % "7.2.27" % Test,
     )
   )
   .settings(testSettings)
