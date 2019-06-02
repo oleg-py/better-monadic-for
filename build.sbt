@@ -1,6 +1,6 @@
 import xerial.sbt.Sonatype._
 
-lazy val scala213 = "2.13.0-RC2"
+lazy val scala213 = "2.13.0-RC3"
 lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 
@@ -14,7 +14,7 @@ ThisBuild / scalaVersion := scala212
 
 val testSettings = Seq(
   libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.1.0-SNAP11" % Test
+    "org.scalatest" %% "scalatest" % "3.1.0-SNAP12" % Test
   ),
   Test / scalacOptions ++= {
     val jar = (betterMonadicFor / Compile / packageBin).value
