@@ -13,9 +13,6 @@ class TestImplicitPatterns extends FreeSpec {
   def typed[A](a: A) = ()
   case class ImplicitTest2(id: String)
 
-  // Make IDE happy
-//  object implicit0 { def unapply[A](a: A) = Some(a) }
-
   "Implicit patterns support" - {
     "for-comprehensions with plain types" - {
       "with type ascription" - {
