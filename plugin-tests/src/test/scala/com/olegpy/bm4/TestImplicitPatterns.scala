@@ -18,7 +18,7 @@ class TestImplicitPatterns extends FreeSpec {
 
   "Implicit patterns support" - {
     "for-comprehensions with plain types" - {
-      "without type ascription" - {
+      "with type ascription" - {
         "as <- binding" in {
           for {
             x <- Option(42)
@@ -85,7 +85,7 @@ class TestImplicitPatterns extends FreeSpec {
     }
 
     "match clauses" - {
-      "without type ascription" in {
+      "with type ascription" in {
         (1, "foo", ImplicitTest("eggs")) match {
           case (_, "foo", implicit0(it: ImplicitTest)) =>
             assert(implicitly[ImplicitTest] eq it)
