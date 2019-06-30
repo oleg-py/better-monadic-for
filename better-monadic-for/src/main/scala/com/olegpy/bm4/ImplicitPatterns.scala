@@ -102,16 +102,40 @@ trait ImplicitPatterns extends TreeUtils { self =>
 
   object HasImplicitPattern {
     def unapply(arg: Tree): Boolean = arg.exists {
-      case q"implicit0(${Bind(t: TermName, Typed(Ident(termNames.WILDCARD), _))})" if t != termNames.WILDCARD =>
-        true
-      case q"implicit0($_)" =>
-        reporter.error(arg.pos, "implicit pattern only supports identifier with type pattern")
+      case t@q"implicit0(${WildcardIdentifier(typed)})" =>
+        val andType = if(typed) " and type" else ""
+
+        reporter.error(
+          arg.pos,
+          s"implicit pattern requires an identifier, but a wildcard was used: `$t`. " +
+            s"This doesn't introduce anything into the implicit scope. You might want to remove the implicit0 pattern$andType."
+        )
         false
+
+      case q"implicit0(${Bind(t: TermName, Typed(Ident(termNames.WILDCARD), _))})" =>
+        true
+
+      case q"implicit0($_)" =>
+        reporter.error(arg.pos, "implicit pattern only supports identifiers with a type pattern")
+        false
+
       case q"implicit0(..$_)" =>
         reporter.error(arg.pos, "implicit pattern only accepts a single parameter")
         false
+
       case _ =>
         false
+    }
+  }
+
+  object WildcardIdentifier {
+    /**
+     * Matches the `_: Foo` and `_` patterns, and specifies whether the type annotation was present.
+     */
+    def unapply(arg: Tree): Option[Boolean] = arg match {
+      case Typed(Ident(termNames.WILDCARD), _) => Some(true)
+      case Ident(termNames.WILDCARD) => Some(false)
+      case _ => None
     }
   }
 
