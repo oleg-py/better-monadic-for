@@ -41,6 +41,7 @@ Supported values for flags:
 
 | Version | Changes
 |---------|-------------------------------------------------------------------------------------------
+| 0.3.1   | Fix issues with wartremover, implicit patterns with = binds & Xplugin-list flag
 | 0.3.0-M4| Fix anonymous variables in Scala 2.12.7+
 | M2, M3  | Fixes for implicit patterns
 | 0.3.0-M1| Initial implementation of implicit patterns

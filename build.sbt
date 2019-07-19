@@ -7,7 +7,7 @@ lazy val scala211 = "2.11.12"
 lazy val supportedScalaVersions = List(scala211, scala212, scala213)
 
 ThisBuild / organization := "com.olegpy"
-ThisBuild / version := "0.3.0"
+ThisBuild / version := "0.3.1"
 ThisBuild / licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 ThisBuild / homepage := Some(url("http://github.com/oleg-py/better-monadic-for"))
 ThisBuild / scalaVersion := scala212
