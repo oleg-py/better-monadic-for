@@ -66,7 +66,7 @@ class BetterMonadicFor(val global: Global) extends Plugin {
       case "implicit-patterns" => implicitPatterns = toBoolean(value)
     }
 
-    noUncheckedFilter || noMapIdentity || noTupling
+    noUncheckedFilter || noMapIdentity || noTupling || implicitPatterns
   }
 }
 

@@ -57,9 +57,13 @@ trait ImplicitPatterns extends TreeUtils { self =>
           replacement
         ))
 
-      case Block((matcher @ NonLocalImplicits(valdefs)) :: stats, expr) =>
-        val m = StripImplicitZero.transform(matcher)
-        val replacement = embedImplicitDefs(Block(m :: stats, expr), valdefs)
+      case Block(stats, expr) if stats.exists(NonLocalImplicits.defined) =>
+        val defns = stats.flatMap {
+          case NonLocalImplicits(vals) => vals
+          case _ => Nil
+        }
+        val newBody = stats.map(StripImplicitZero.transform)
+        val replacement = embedImplicitDefs(Block(newBody, expr), defns)
         Some(replaceTree(tree, replacement))
 
 
@@ -147,16 +151,23 @@ trait ImplicitPatterns extends TreeUtils { self =>
   }
 
   object NonLocalImplicits {
-    def unapply(vd: ValDef): Option[List[ValDef]] = {
-      vd.rhs match {
-        case Match(_, CaseDef(pat, _, _) :: Nil) if vd.mods.hasFlag(Flag.ARTIFACT) =>
-          val vd = pat.collect {
-            case q"implicit0(${Bind(TermName(nm), Typed(_, tpt))})" =>
-              mkValDef(nm, tpt)
-          }
-          if (vd.nonEmpty) Some(vd) else None
-        case _ => None
-      }
+    val pf: PartialFunction[Tree, List[ValDef]] = {
+      case ValDef(mods, _, _, Match(_, CaseDef(pat, _, _) :: Nil))
+        if mods.hasFlag(Flag.ARTIFACT) &&
+        pat.exists {
+          case q"implicit0(${Bind(TermName(_), Typed(_, _))})" => true
+          case _ => false
+        }
+      =>
+        pat.collect {
+          case q"implicit0(${Bind(TermName(nm), Typed(_, tpt))})" =>
+            mkValDef(nm, tpt)
+        }
     }
+
+    private[this] val lifted = pf.lift
+    val defined = pf.isDefinedAt _
+
+    def unapply(vd: ValDef): Option[List[ValDef]] = lifted(vd)
   }
 }

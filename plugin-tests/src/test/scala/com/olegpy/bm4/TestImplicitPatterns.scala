@@ -58,6 +58,23 @@ class TestImplicitPatterns extends FreeSpec {
           }
 
           "with multiple implicit variables" - {
+            "= bindings after non-implicit = bindings" in {
+              case class One()
+              case class Two()
+              case class Three()
+
+              def dummy(): Int = 42
+              def foo(implicit a: Two): Three = Three()
+
+              for {
+                _ <- Option(1)
+                implicit0(one: One) <- Option(One())
+                x = dummy()
+                implicit0(two: Two) = Two()
+                _ = foo
+              } yield "ok"
+            }
+
             "mixed bindings" in {
               for {
                 _ <- Option("dummy")
