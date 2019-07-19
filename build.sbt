@@ -98,3 +98,13 @@ lazy val scalazTests = (project in file("scalaz-tests"))
     )
   )
   .settings(testSettings)
+
+lazy val wartRemoverTests = (project in file("wartremover-tests"))
+  .dependsOn(pluginTests % "compile->compile;test->test")
+  .settings(
+    name := "wartremover-tests",
+    crossScalaVersions := List(scala212),
+    addCompilerPlugin("org.wartremover" %% "wartremover" % "2.4.2"),
+    scalacOptions += "-P:wartremover:traverser:org.wartremover.warts.NonUnitStatements"
+  )
+  .settings(testSettings)
