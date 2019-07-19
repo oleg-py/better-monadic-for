@@ -10,7 +10,7 @@ import nsc.transform.{Transform, TypingTransformers}
 class BetterMonadicFor(val global: Global) extends Plugin {
   val name = "bm4"
   val description = "Remove withFilter / partial matches in for-comprehension"
-  val components =
+  lazy val components =
     new ForRewriter(this, global) ::
     new MapRemover(this, global) ::
     new TupleRemover(this, global) ::
