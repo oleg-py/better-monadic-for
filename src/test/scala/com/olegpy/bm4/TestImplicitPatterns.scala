@@ -101,6 +101,23 @@ class TestImplicitPatterns extends FreeSpec {
 
         f[Option]
       }
+
+      "= bindings after non-implicit = bindings" in {
+        case class One()
+        case class Two()
+        case class Three()
+
+        def dummy(): Int = 42
+        def foo(implicit a: Two): Three = Three()
+
+        for {
+          _ <- Option(1)
+          implicit0(one: One) <- Option(One())
+          x = dummy()
+          implicit0(two: Two) = Two()
+          _ = foo
+        } yield "ok"
+      }
     }
 
     "match clauses" - {
