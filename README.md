@@ -193,7 +193,7 @@ for {
 } yield "ok"
 ```
 
-In current version (0.3.0-M4) it's required to specify a type annotation in a pattern with `implicit0`.
+In current version (0.3.0) it's required to specify a type annotation in a pattern with `implicit0`.
 
 It also works in regular match clauses:
 ```scala
