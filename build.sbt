@@ -1,7 +1,7 @@
 import xerial.sbt.Sonatype._
 
-lazy val scala213 = "2.13.1"
-lazy val scala212 = "2.12.11"
+lazy val scala213 = "2.13.7"
+lazy val scala212 = "2.12.15"
 lazy val scala211 = "2.11.12"
 
 lazy val supportedScalaVersions = List(scala211, scala212, scala213)
@@ -13,7 +13,7 @@ ThisBuild / homepage := Some(url("http://github.com/oleg-py/better-monadic-for")
 ThisBuild / scalaVersion := Option(System.getenv("SCALA_VERSION")).filter(_.nonEmpty).getOrElse(scala213)
 
 val testSettings = Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.2" % Test,
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.4" % Test,
   Test / scalacOptions ++= {
     val jar = (betterMonadicFor / Compile / packageBin).value
     Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile
@@ -60,10 +60,10 @@ lazy val pcplodTests = (project in file("pcplod-tests"))
       "org.ensime" %% "pcplod" % "1.2.1" % Test
     ),
     // WORKAROUND https://github.com/ensime/pcplod/issues/12
-    fork in Test := true,
-    javaOptions in Test ++= Seq(
-      s"""-Dpcplod.settings=${(scalacOptions in Test).value.filterNot(_.contains(",")).mkString(",")}""",
-      s"""-Dpcplod.classpath=${(fullClasspath in Test).value.map(_.data).mkString(",")}"""
+    Test / fork := true,
+    Test / javaOptions ++= Seq(
+      s"""-Dpcplod.settings=${(Test / scalacOptions).value.filterNot(_.contains(",")).mkString(",")}""",
+      s"""-Dpcplod.classpath=${(Test / fullClasspath).value.map(_.data).mkString(",")}"""
     )
   )
   .settings(testSettings)
@@ -72,7 +72,7 @@ lazy val catsTests = (project in file("cats-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
     name := "cats-tests",
-    crossScalaVersions := List(scala211, scala212),
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "2.0.0" % Test
     )
@@ -84,9 +84,9 @@ lazy val scalazTests = (project in file("scalaz-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
     name := "scalaz-tests",
-    crossScalaVersions := List(scala211, scala212),
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Seq(
-      "org.scalaz" %% "scalaz-core" % "7.2.27" % Test,
+      "org.scalaz" %% "scalaz-core" % "7.2.33" % Test,
     )
   )
   .settings(testSettings)
@@ -95,8 +95,8 @@ lazy val wartRemoverTests = (project in file("wartremover-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
     name := "wartremover-tests",
-    crossScalaVersions := List(scala212),
-    addCompilerPlugin("org.wartremover" %% "wartremover" % "2.4.2"),
+    crossScalaVersions := supportedScalaVersions,
+    addCompilerPlugin("org.wartremover" %% "wartremover" % "2.4.3"),
     scalacOptions += "-P:wartremover:traverser:org.wartremover.warts.NonUnitStatements"
   )
   .settings(testSettings)
