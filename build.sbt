@@ -51,7 +51,7 @@ lazy val betterMonadicFor = (project in file("better-monadic-for"))
     ),
     publishTo := sonatypePublishTo.value,
     publishMavenStyle := true,
-    scalacOptions in Compile ++= Seq("-opt:l:inline", "-opt-inline-from:scala/**"),
+    scalacOptions in Compile ++= Seq("-opt:l:inline", "-opt-inline-from:scala.**"),
     sonatypeProjectHosting := Some(GitHubHosting("oleg-py", "better-monadic-for", "oleg.pyzhcov@gmail.com")),
   )
 
