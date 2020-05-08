@@ -1,7 +1,7 @@
 import xerial.sbt.Sonatype._
 
-lazy val scala213 = "2.13.0"
-lazy val scala212 = "2.12.8"
+lazy val scala213 = "2.13.1"
+lazy val scala212 = "2.12.10"
 lazy val scala211 = "2.11.12"
 
 lazy val supportedScalaVersions = List(scala211, scala212, scala213)
@@ -13,15 +13,7 @@ ThisBuild / homepage := Some(url("http://github.com/oleg-py/better-monadic-for")
 ThisBuild / scalaVersion := scala212
 
 val testSettings = Seq(
-  libraryDependencies ++= Seq(
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 13)) =>
-        // bincompatible enough :)
-        "org.scalatest" % "scalatest_2.13.0-RC3" % "3.1.0-SNAP12" % Test
-      case _ => "org.scalatest" %% "scalatest" % "3.1.0-SNAP12" % Test
-    }
-   
-  ),
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0-RC3",
   Test / scalacOptions ++= {
     val jar = (betterMonadicFor / Compile / packageBin).value
     Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile
@@ -80,9 +72,9 @@ lazy val catsTests = (project in file("cats-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
     name := "cats-tests",
-    crossScalaVersions := List(scala211, scala212),
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.6.0" % Test
+      "org.typelevel" %% "cats-core" % "2.0.0" % Test
     )
   )
   .settings(testSettings)
@@ -92,9 +84,9 @@ lazy val scalazTests = (project in file("scalaz-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
     name := "scalaz-tests",
-    crossScalaVersions := List(scala211, scala212),
+    crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= Seq(
-      "org.scalaz" %% "scalaz-core" % "7.2.27" % Test,
+      "org.scalaz" %% "scalaz-core" % "7.2.29" % Test,
     )
   )
   .settings(testSettings)
@@ -103,8 +95,8 @@ lazy val wartRemoverTests = (project in file("wartremover-tests"))
   .dependsOn(pluginTests % "compile->compile;test->test")
   .settings(
     name := "wartremover-tests",
-    crossScalaVersions := List(scala212),
-    addCompilerPlugin("org.wartremover" %% "wartremover" % "2.4.2"),
+    crossScalaVersions := supportedScalaVersions,
+    addCompilerPlugin("org.wartremover" %% "wartremover" % "2.4.3"),
     scalacOptions += "-P:wartremover:traverser:org.wartremover.warts.NonUnitStatements"
   )
   .settings(testSettings)
