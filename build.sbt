@@ -36,7 +36,7 @@ val testSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(betterMonadicFor, pluginTests, catsTests, scalazTests, pcplodTests)
+  .aggregate(betterMonadicFor, pluginTests, catsTests, scalazTests)
   .settings(
     crossScalaVersions := Nil,
     publish / skip := true
@@ -82,7 +82,7 @@ lazy val catsTests = (project in file("cats-tests"))
     name := "cats-tests",
     crossScalaVersions := List(scala211, scala212),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "1.6.0" % Test
+      "org.typelevel" %% "cats-core" % "2.0.0" % Test
     )
   )
   .settings(testSettings)
