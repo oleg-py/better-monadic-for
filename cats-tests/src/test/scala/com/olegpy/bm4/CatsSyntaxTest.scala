@@ -1,10 +1,10 @@
 package com.olegpy.bm4
 
 import cats.Monad
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 import cats.implicits._
 
-class CatsSyntaxTest extends FreeSpec {
+class CatsSyntaxTest extends AnyFreeSpec {
   implicit val mcCatsInstance: cats.FlatMap[MapCheck] = new cats.FlatMap[MapCheck] {
     def flatMap[A, B](fa: MapCheck[A])(f: A => MapCheck[B]): MapCheck[B] = {
       fa.flatMap(f)

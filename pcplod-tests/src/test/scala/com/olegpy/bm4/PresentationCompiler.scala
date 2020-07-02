@@ -1,9 +1,9 @@
 package com.olegpy.bm4
 
 import org.ensime.pcplod._
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class PresentationCompiler extends FreeSpec {
+class PresentationCompiler extends AnyFreeSpec {
   "PC should have no errors" in {
     withMrPlod("Arrows.scala") { pc =>
       assert(pc.messages.isEmpty)

@@ -1,9 +1,9 @@
 package com.olegpy.bm4
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 import scalaz._, Scalaz._
 
-class ScalazSyntaxTest extends FreeSpec {
+class ScalazSyntaxTest extends AnyFreeSpec {
   implicit val scalazInstance: Bind[MapCheck] = new Bind[MapCheck] {
     def bind[A, B](fa: MapCheck[A])(f: A => MapCheck[B]): MapCheck[B] = fa.flatMap(f)
 

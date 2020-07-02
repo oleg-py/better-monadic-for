@@ -13,15 +13,7 @@ ThisBuild / homepage := Some(url("http://github.com/oleg-py/better-monadic-for")
 ThisBuild / scalaVersion := Option(System.getenv("SCALA_VERSION")).filter(_.nonEmpty).getOrElse(scala213)
 
 val testSettings = Seq(
-  libraryDependencies ++= Seq(
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, 13)) =>
-        // bincompatible enough :)
-        "org.scalatest" % "scalatest_2.13.0-RC3" % "3.1.0-SNAP12" % Test
-      case _ => "org.scalatest" %% "scalatest" % "3.1.0-SNAP12" % Test
-    }
-   
-  ),
+  libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.2" % Test,
   Test / scalacOptions ++= {
     val jar = (betterMonadicFor / Compile / packageBin).value
     Seq(s"-Xplugin:${jar.getAbsolutePath}", s"-Jdummy=${jar.lastModified}") // ensures recompile

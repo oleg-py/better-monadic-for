@@ -1,6 +1,6 @@
 package com.olegpy.bm4
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 case class MapCalled() extends Exception
 
@@ -9,7 +9,7 @@ class MapCheck[+A](a: A) {
   def flatMap[B](f: A => MapCheck[B]): MapCheck[B] = f(a)
 }
 
-class TestNoMap extends FreeSpec {
+class TestNoMap extends AnyFreeSpec {
   "emits no map(b => b) in for-comprehension" in {
     for {
       _ <- new MapCheck(42)
