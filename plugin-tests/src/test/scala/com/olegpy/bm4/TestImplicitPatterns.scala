@@ -1,6 +1,6 @@
 package com.olegpy.bm4
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 object CTTest {
   def foo[A]: Mo[A] = for {
@@ -8,7 +8,7 @@ object CTTest {
   } yield implicitly[A]
 }
 
-class TestImplicitPatterns extends FreeSpec {
+class TestImplicitPatterns extends AnyFreeSpec {
   case class ImplicitTest(id: String)
   def typed[A](a: A) = ()
   case class ImplicitTest2(id: String)

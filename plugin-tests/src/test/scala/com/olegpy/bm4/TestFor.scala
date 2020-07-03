@@ -3,7 +3,7 @@ package com.olegpy.bm4
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 
-import org.scalatest.{FreeSpec, FunSuite}
+import org.scalatest.freespec.AnyFreeSpec
 
 /** Mo is a lazy monad without `withFilter` */
 sealed trait Mo[A] {
@@ -26,7 +26,7 @@ object Mo {
   val unit: Mo[Unit] = Mo(())
 }
 
-class TestFor extends FreeSpec {
+class TestFor extends AnyFreeSpec {
 
   "Plugin allows" - {
     "destructuring for monads without withFilter" in {

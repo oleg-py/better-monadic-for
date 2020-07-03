@@ -1,10 +1,9 @@
 package com.olegpy.bm4
 
 import com.olegpy.bm4.TestNoTuples.TupleChecker
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-
-class TestNoTuples extends FreeSpec {
+class TestNoTuples extends AnyFreeSpec {
   "Plugin removes tuples produced in binding" - {
     "for single definition" in {
       for {
