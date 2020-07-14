@@ -133,9 +133,9 @@ With the plugin, both versions are equivalent and result in `MatchError`
 Generators will now show exhaustivity warnings now whenever regular pattern matches would:
 
 ```scala
-        import cats.syntax.option._
+import cats.syntax.option._
 
-        for (Some(x) <- IO(none[Int])) yield x
+for (Some(x) <- IO(none[Int])) yield x
 ```
 
 ```
