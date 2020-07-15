@@ -10,6 +10,24 @@ The plugin is available on Maven Central.
 ```sbt
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
 ```
+To add into pants project 
+
+Add into your root `BUILD` file 
+
+```ini
+jar_library(name='scalac-plugin-dep',
+            jars=[
+                scala_jar(org='com.olegpy', name='better-monadic-for', rev='0.3.1')
+            ])
+```
+
+Add to your `pants.ini`
+
+```ini
+[scala]
+scalac_plugins: ['bm4']
+```
+
 Supports Scala 2.11, 2.12, and 2.13.1
 
 <details>
