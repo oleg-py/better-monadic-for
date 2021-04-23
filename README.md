@@ -7,9 +7,31 @@ A Scala compiler plugin to give patterns and for-comprehensions the love they de
 
 ## Getting started
 The plugin is available on Maven Central.
+
+### sbt
+
 ```sbt
 addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1")
 ```
+
+### maven
+
+```xml
+<plugin>
+  <groupId>net.alchim31.maven</groupId>
+  <artifactId>scala-maven-plugin</artifactId>
+  <configuration>
+    <compilerPlugins>
+      <compilerPlugin>
+        <groupId>com.olegpy</groupId>
+        <artifactId>better-monadic-for_2.13</artifactId>
+        <version>0.3.1</version>
+      </compilerPlugin>
+    </compilerPlugins>
+  </configuration>
+</plugin>
+```
+
 Supports Scala 2.11, 2.12, and 2.13.1
 
 <details>
