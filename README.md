@@ -5,6 +5,21 @@
 
 A Scala compiler plugin to give patterns and for-comprehensions the love they deserve
 
+## Note on Scala 3
+Scala 3.0.0 natively supports the semantic changes provided by better-monadic-for under `-source:future` compiler flag. The following code is considered valid under this flag:
+
+```scala
+for {
+  (x, given String) <- IO(42 -> "foo")
+} yield s"$x${summon[String]}"
+```
+
+There are no changes to `map` desugaring and value bindings inside fors still allocate tuples to my current knowledge. I don't currently have plans on rewriting plugin for Scala 3, however.
+
+See [changes: pattern bindings](https://dotty.epfl.ch/docs/reference/changed-features/pattern-bindings.html) and [contextual abstractions: pattern-bound given instances](https://dotty.epfl.ch/docs/reference/contextual/givens.html#pattern-bound-given-instances).
+
+---
+
 ## Getting started
 The plugin is available on Maven Central.
 
